@@ -603,7 +603,7 @@ tr:hover td { background: var(--surface2); }
         <div class="form-group">
           <label>Society / Group</label>
           <select id="f-society" onchange="populatePacks(getSocietyType(), '')">
-            <option>YNC</option>
+            <option>Society</option>
             <option>IIM-L Alumni</option>
             <option>Others</option>
           </select>
@@ -779,7 +779,7 @@ tr:hover td { background: var(--surface2); }
       <div class="form-group">
         <label>Society</label>
         <select id="e-society" onchange="populateEditPacks()">
-          <option>YNC</option><option>IIM-L Alumni</option>
+          <option>Society</option><option>IIM-L Alumni</option>
           <option>Others</option>
         </select>
       </div>
@@ -805,8 +805,8 @@ tr:hover td { background: var(--surface2); }
 <script>
 // ─── PRICING ─────────────────────────────────────────────
 const PRICING_DEFAULTS = {
-  standard: { "2": 380, "3": 540, "5": 800 },
-  iim: { "5": 900, "7": 1200 }
+  standard: { "2": 0, "3": 0, "5": 0 },
+  iim: { "5": 0, "7": 0 }
 };
 let PRICING = JSON.parse(localStorage.getItem("mango-pricing-2026") || JSON.stringify(PRICING_DEFAULTS));
 let orders = [];
