@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🥭 Mango Order Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg: #fdf8f0;
+  --surface: #ffffff;
+  --surface2: #fef3e2;
+  --border: #e8dcc8;
+  --text: #1c1712;
+  --muted: #8a7560;
+  --accent: #c8690a;
+  --accent-light: #fef3e2;
+  --green: #15803d;
+  --green-bg: #f0fdf4;
+  --red: #b91c1c;
+  --red-bg: #fef2f2;
+  --blue: #1d4ed8;
+  --blue-bg: #eff6ff;
+  --radius: 10px;
+  --shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  background: var(--text);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  height: 56px;
+}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.header-icon { font-size: 22px; }
+.header-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+.header-sub {
+  font-size: 11px;
+  color: #a89880;
+  margin-top: 1px;
+}
+.header-badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+}
+
+/* TABS */
+.tabs {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 14px 18px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+  position: relative;
+  top: 1px;
+}
+.tab:hover { color: var(--text); }
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* CONTAINER */
+.container { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+
+/* SECTION */
+.section { display: none; }
+.section.active { display: block; }
+
+/* STATS */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.stat-value {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+.card-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* FORM */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 9px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--accent);
+  background: #fff;
+}
+.amount-big {
+  font-family: 'DM Serif Display', serif;
+  font-size: 24px;
+  color: var(--accent);
+  padding: 6px 0;
+}
+
+/* AUTOCOMPLETE */
+.autocomplete-wrap { position: relative; }
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  z-index: 300;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+}
+.autocomplete-list.open { display: block; }
+.autocomplete-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item:hover { background: var(--surface2); }
+.autocomplete-item strong { font-size: 13px; }
+.autocomplete-item span { font-size: 11px; color: var(--muted); }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--bg); border-color: #ccc; }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: #a8560a; border-color: #a8560a; }
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+  padding: 6px 10px;
+}
+.btn-ghost:hover { background: var(--bg); color: var(--text); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-repeat {
+  background: var(--blue-bg);
+  color: var(--blue);
+  border-color: #bfdbfe;
+}
+.btn-repeat:hover { background: #dbeafe; }
+.btn-danger { color: var(--red); border-color: #fecaca; background: var(--red-bg); }
+.btn-danger:hover { background: #fee2e2; }
+
+/* AI PARSER */
+.ai-area {
+  background: var(--surface2);
+  border: 1px dashed #e0c99a;
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.ai-area label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
+  margin-bottom: 6px;
+}
+.ai-area textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  resize: vertical;
+  min-height: 70px;
+  outline: none;
+}
+.ai-area textarea:focus { border-color: var(--accent); }
+.ai-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.ai-status { font-size: 12px; color: var(--muted); }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+  background: var(--bg);
+}
+td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+.td-name { font-weight: 600; }
+.td-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* BADGES */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-red { background: var(--red-bg); color: var(--red); }
+.badge-amber { background: #fef3c7; color: #92400e; }
+.badge-blue { background: var(--blue-bg); color: var(--blue); }
+.badge-gray { background: #f3f4f6; color: #6b7280; }
+
+/* FILTERS */
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  align-items: center;
+}
+.filters input, .filters select {
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+}
+.filters input:focus, .filters select:focus { border-color: var(--accent); }
+.filters input { flex: 1; min-width: 180px; }
+
+/* INLINE SELECT */
+.inline-select {
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 3px 6px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  outline: none;
+}
+.inline-select:hover { border-color: var(--border); background: var(--bg); }
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  margin-bottom: 18px;
+}
+.modal-footer { display: flex; gap: 10px; margin-top: 20px; }
+
+/* CUSTOMERS */
+.customer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.customer-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s;
+}
+.customer-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.09); }
+.customer-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+.customer-society { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.customer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.customer-stat {
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.customer-stat strong { color: var(--accent); }
+.customer-actions { display: flex; gap: 8px; }
+.customer-history {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+}
+
+/* SUMMARY */
+.summary-table { width: 100%; border-collapse: collapse; }
+.summary-table th {
+  background: var(--text);
+  color: #fff;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+.summary-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.summary-table tr:last-child td { font-weight: 600; background: var(--surface2); }
+
+/* SETTINGS */
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-label { flex: 1; }
+.settings-label strong { display: block; font-size: 14px; margin-bottom: 2px; }
+.settings-label span { font-size: 12px; color: var(--muted); }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--text);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 999;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.25s;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--green); }
+.toast.error { background: var(--red); }
+
+/* EMPTY */
+.empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-text { font-size: 15px; margin-bottom: 6px; color: var(--text); font-weight: 500; }
+.empty-sub { font-size: 13px; }
+
+/* NOTES BADGE */
+.notes-tip {
+  background: var(--accent-light);
+  border: 1px solid #f0d9b5;
+  border-radius: 7px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #8a5a2a;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+  .container { padding: 16px 12px; }
+  .header { padding: 0 16px; }
+  .tabs { padding: 0 12px; }
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">
+    <span class="header-icon">🥭</span>
+    <div>
+      <div class="header-title">Mango Manager</div>
+      <div class="header-sub">Chandwad Hapus · 2026</div>
+    </div>
+  </div>
+  <span class="header-badge">v2</span>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('add')" id="tab-add">Add Order</button>
+  <button class="tab" onclick="switchTab('orders')" id="tab-orders">Orders</button>
+  <button class="tab" onclick="switchTab('customers')" id="tab-customers">Customers</button>
+  <button class="tab" onclick="switchTab('summary')" id="tab-summary">Summary</button>
+  <button class="tab" onclick="switchTab('settings')" id="tab-settings">Settings</button>
+</div>
+
+<div class="container">
+
+  <!-- ═══ ADD ORDER ═══ -->
+  <div class="section active" id="section-add">
+    <div class="stats-grid" id="stats-bar"></div>
+
+    <div class="card">
+      <div class="card-title">📋 Paste WhatsApp Message</div>
+      <div class="ai-area">
+        <label>WhatsApp DM (optional — AI will parse it)</label>
+        <textarea id="raw-msg" placeholder="Paste order message here..."></textarea>
+        <div class="ai-row">
+          <button class="btn btn-primary btn-sm" onclick="parseMessage()">✨ Parse with AI</button>
+          <span class="ai-status" id="parse-status"></span>
+        </div>
+      </div>
+
+      <div class="notes-tip">💡 Start typing a customer name below — returning customers will auto-fill!</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Customer Name *</label>
+          <div class="autocomplete-wrap">
+            <input id="f-name" placeholder="Name" oninput="handleNameInput(this.value)" autocomplete="off" />
+            <div class="autocomplete-list" id="name-suggestions"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp Number</label>
+          <input id="f-whatsapp" placeholder="+91 98..." />
+        </div>
+        <div class="form-group">
+          <label>Phone / Contact</label>
+          <input id="f-contact" placeholder="Alternate number" />
+        </div>
+        <div class="form-group">
+          <label>Society / Group</label>
+          <select id="f-society" onchange="populatePacks(getSocietyType(), '')">
+            <option>YNC</option>
+            <option>IIM-L Alumni</option>
+            <option>Others</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Flat / Address</label>
+          <input id="f-flat" placeholder="B-402, Tower 3..." />
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Pack Size</label>
+          <select id="f-pack" onchange="updateTotal()"></select>
+        </div>
+        <div class="form-group">
+          <label>No. of Packs</label>
+          <input id="f-qty" type="number" min="1" value="1" oninput="updateTotal()" />
+        </div>
+        <div class="form-group">
+          <label>Delivery Date</label>
+          <input id="f-delivery-date" type="date" />
+        </div>
+        <div class="form-group">
+          <label>Amount</label>
+          <div class="amount-big" id="f-total">₹0</div>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-group">
+          <label>Notes</label>
+          <input id="f-notes" placeholder="Special instructions..." />
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="addOrder()">💾 Save Order</button>
+        <button class="btn" onclick="clearForm()">✕ Clear</button>
+        <span id="save-status" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ORDERS ═══ -->
+  <div class="section" id="section-orders">
+    <div class="filters">
+      <input id="search-orders" placeholder="🔍 Search name, society..." oninput="renderOrders()" />
+      <select id="filter-delivery" onchange="renderOrders()">
+        <option value="">All Delivery</option>
+        <option>Pending</option>
+        <option>Delivered</option>
+      </select>
+      <select id="filter-payment" onchange="renderOrders()">
+        <option value="">All Payment</option>
+        <option>Unpaid</option>
+        <option>Paid (Cash)</option>
+        <option>Paid (UPI)</option>
+      </select>
+      <button class="btn btn-sm" onclick="exportCSV()">📥 Export CSV</button>
+      <button class="btn btn-sm btn-danger" onclick="confirmClearAll()">🗑 Clear All</button>
+    </div>
+    <div id="orders-totals" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:12px;font-size:13px"></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap">
+        <table id="orders-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Customer</th>
+              <th>Society</th>
+              <th>Pack</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th>Delivery</th>
+              <th>Payment</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orders-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CUSTOMERS ═══ -->
+  <div class="section" id="section-customers">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div style="font-size:13px;color:var(--muted)">Customers are built automatically from your orders.</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input style="border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:13px;font-family:inherit;background:var(--surface);outline:none;width:200px" placeholder="🔍 Search customers..." oninput="renderCustomers(this.value)" id="search-customers" />
+        <button class="btn btn-sm" onclick="exportCustomersXLSX()">📥 Export XLSX</button>
+      </div>
+    </div>
+    <div class="customer-grid" id="customers-grid"></div>
+  </div>
+
+  <!-- ═══ SUMMARY ═══ -->
+  <div class="section" id="section-summary">
+    <div id="summary-content"></div>
+  </div>
+
+  <!-- ═══ SETTINGS ═══ -->
+  <div class="section" id="section-settings">
+    <div class="card">
+      <div class="card-title">⚙️ Settings</div>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <strong>Anthropic API Key</strong>
+          <span>For AI-powered WhatsApp message parsing</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="api-key-input" type="password" placeholder="sk-ant-..." style="border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:13px;font-family:inherit;width:220px;outline:none" />
+          <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <strong>Pricing — Standard (per pack)</strong>
+          <span>Price per kg pack for regular groups</span>
+        </div>
+        <div id="pricing-standard"></div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <strong>Pricing — IIM-L Alumni (per pack)</strong>
+          <span>Premium pricing for IIM group</span>
+        </div>
+        <div id="pricing-iim"></div>
+      </div>
+
+      <div style="margin-top:16px">
+        <button class="btn btn-primary btn-sm" onclick="savePricing()">💾 Save Pricing</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💾 Data Management</div>
+      <div class="settings-row">
+        <div class="settings-label">
+          <strong>Export All Data</strong>
+          <span>Download orders as CSV</span>
+        </div>
+        <button class="btn btn-sm" onclick="exportCSV()">📥 Export CSV</button>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
+          <strong>Import Orders</strong>
+          <span>Load orders from a previously exported CSV</span>
+        </div>
+        <div>
+          <input type="file" id="import-file" accept=".csv" style="display:none" onchange="importCSV(event)" />
+          <button class="btn btn-sm" onclick="document.getElementById('import-file').click()">📤 Import CSV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Order</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Name</label><input id="e-name" /></div>
+      <div class="form-group"><label>WhatsApp</label><input id="e-whatsapp" /></div>
+      <div class="form-group"><label>Contact</label><input id="e-contact" /></div>
+      <div class="form-group">
+        <label>Society</label>
+        <select id="e-society" onchange="populateEditPacks()">
+          <option>YNC</option><option>IIM-L Alumni</option>
+          <option>Others</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Flat / Address</label><input id="e-flat" /></div>
+      <div class="form-group"><label>Pack Size</label><select id="e-pack" onchange="updateEditTotal()"></select></div>
+      <div class="form-group"><label>No. of Packs</label><input id="e-qty" type="number" min="1" oninput="updateEditTotal()" /></div>
+      <div class="form-group"><label>Delivery Date</label><input id="e-delivery-date" type="date" /></div>
+      <div class="form-group"><label>Delivery Status</label><select id="e-delivery-status"><option>Pending</option><option>Delivered</option></select></div>
+      <div class="form-group"><label>Payment</label><select id="e-payment"><option>Unpaid</option><option>Paid (Cash)</option><option>Paid (UPI)</option></select></div>
+      <div class="form-group"><label>Amount</label><div class="amount-big" id="e-total">₹0</div></div>
+    </div>
+    <div class="form-group" style="margin-bottom:4px"><label>Notes</label><input id="e-notes" /></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveEdit()">💾 Save Changes</button>
+      <button class="btn" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── PRICING ─────────────────────────────────────────────
+const PRICING_DEFAULTS = {
+  standard: { "2": 380, "3": 540, "5": 800 },
+  iim: { "5": 900, "7": 1200 }
+};
+let PRICING = JSON.parse(localStorage.getItem("mango-pricing-2026") || JSON.stringify(PRICING_DEFAULTS));
+let orders = [];
+let customers = {}; // keyed by normalised name+whatsapp
+let editingId = null;
+
+// ─── INDEXEDDB ────────────────────────────────────────────
+const DB = {
+  db: null,
+  async init() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open("MangoOrders2026", 2); // bumped to v2
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("orders"))
+          db.createObjectStore("orders", { keyPath: "id" });
+        if (!db.objectStoreNames.contains("customers"))
+          db.createObjectStore("customers", { keyPath: "id" });
+      };
+      req.onsuccess = e => { this.db = e.target.result; resolve(); };
+      req.onerror = () => reject(req.error);
+    });
+  },
+  async getAll(store) {
+    return new Promise(r => {
+      const req = this.db.transaction(store,"readonly").objectStore(store).getAll();
+      req.onsuccess = () => r(req.result || []);
+    });
+  },
+  async put(store, obj) {
+    return new Promise(r => {
+      const tx = this.db.transaction(store,"readwrite");
+      tx.objectStore(store).put(obj);
+      tx.oncomplete = r;
+    });
+  },
+  async delete(store, id) {
+    return new Promise(r => {
+      const tx = this.db.transaction(store,"readwrite");
+      tx.objectStore(store).delete(id);
+      tx.oncomplete = r;
+    });
+  },
+  async clear(store) {
+    return new Promise(r => {
+      const tx = this.db.transaction(store,"readwrite");
+      tx.objectStore(store).clear();
+      tx.oncomplete = r;
+    });
+  }
+};
+
+// ─── INIT ─────────────────────────────────────────────────
+async function load() {
+  await DB.init();
+  orders = await DB.getAll("orders");
+  await rebuildCustomers();
+  populatePacks(getSocietyType(), '');
+  renderStats();
+  renderOrders();
+  renderCustomers('');
+  renderSummary();
+  renderPricingInputs();
+  updateTabCounts();
+  const saved = localStorage.getItem("mango-api-key");
+  if (saved) document.getElementById("api-key-input").value = saved;
+}
+
+// ─── CUSTOMERS ────────────────────────────────────────────
+async function rebuildCustomers() {
+  customers = {};
+  for (const o of orders) {
+    const key = customerKey(o.name, o.whatsapp);
+    if (!customers[key]) {
+      customers[key] = {
+        id: key,
+        name: o.name,
+        whatsapp: o.whatsapp || '',
+        contact: o.contact || '',
+        society: o.society || '',
+        flat: o.flat || '',
+        orders: [],
+        totalAmount: 0,
+        totalPaid: 0,
+      };
+    }
+    const c = customers[key];
+    c.orders.push({
+      date: o.dateTime,
+      deliveryDate: o.deliveryDate,
+      pack: o.packSize,
+      qty: o.quantity,
+      total: o.total,
+      payment: o.paymentStatus,
+      delivery: o.deliveryStatus,
+      id: o.id
+    });
+    c.totalAmount += (o.total || 0);
+    if (o.paymentStatus !== 'Unpaid') c.totalPaid += (o.total || 0);
+    // keep latest details
+    if (o.flat) c.flat = o.flat;
+    if (o.contact) c.contact = o.contact;
+    if (o.society) c.society = o.society;
+    if (o.whatsapp) c.whatsapp = o.whatsapp;
+    if (o.name) c.name = o.name;
+  }
+}
+
+function customerKey(name, whatsapp) {
+  if (whatsapp && whatsapp.trim()) return 'wa_' + whatsapp.replace(/\D/g,'');
+  return 'nm_' + (name||'').trim().toLowerCase().replace(/\s+/g,'_');
+}
+
+function renderCustomers(search='') {
+  const grid = document.getElementById('customers-grid');
+  const clist = Object.values(customers).filter(c => {
+    if (!search) return true;
+    const s = search.toLowerCase();
+    return c.name.toLowerCase().includes(s) || c.society.toLowerCase().includes(s);
+  });
+  if (!clist.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">👤</div><div class="empty-text">No customers yet</div><div class="empty-sub">Customers appear automatically as you add orders.</div></div>`;
+    return;
+  }
+  grid.innerHTML = clist.sort((a,b)=>b.orders.length-a.orders.length).map(c => {
+    const unpaid = c.totalAmount - c.totalPaid;
+    const lastOrder = c.orders[c.orders.length-1];
+    const historyRows = c.orders.slice(-3).reverse().map(o =>
+      `<div class="history-item"><span>${o.date || o.deliveryDate || '—'} · ${o.qty}×${o.pack}kg</span><span>₹${o.total}</span></div>`
+    ).join('');
+    return `
+    <div class="customer-card">
+      <div class="customer-name">${c.name}</div>
+      <div class="customer-society">${c.society}${c.flat ? ' · ' + c.flat : ''}</div>
+      <div class="customer-meta">
+        <div class="customer-stat">📦 <strong>${c.orders.length}</strong> order${c.orders.length>1?'s':''}</div>
+        <div class="customer-stat">💰 <strong>₹${c.totalAmount}</strong> total</div>
+        ${unpaid > 0 ? `<div class="customer-stat">⚠️ <strong style="color:var(--red)">₹${unpaid}</strong> due</div>` : `<div class="customer-stat">✅ <strong style="color:var(--green)">Paid</strong></div>`}
+      </div>
+      <div class="customer-actions">
+        <button class="btn btn-repeat btn-sm" onclick="repeatOrder('${c.id}')">🔄 Repeat Order</button>
+        ${c.whatsapp ? `<button class="btn btn-sm" onclick="window.open('https://wa.me/${c.whatsapp.replace(/\D/g,'')}')">💬 WhatsApp</button>` : ''}
+      </div>
+      ${c.orders.length > 0 ? `<div class="customer-history"><div style="font-weight:600;margin-bottom:4px;color:var(--text)">Recent orders</div>${historyRows}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function repeatOrder(custId) {
+  const c = customers[custId];
+  if (!c) return;
+  switchTab('add');
+  setTimeout(() => {
+    document.getElementById('f-name').value = c.name;
+    document.getElementById('f-whatsapp').value = c.whatsapp || '';
+    document.getElementById('f-contact').value = c.contact || '';
+    document.getElementById('f-flat').value = c.flat || '';
+    // set society
+    const soc = document.getElementById('f-society');
+    for (let i=0;i<soc.options.length;i++) {
+      if (soc.options[i].value === c.society) { soc.selectedIndex = i; break; }
+    }
+    // pre-fill with last order's pack
+    const lastO = c.orders[c.orders.length-1];
+    populatePacks(getSocietyType(), lastO ? lastO.pack : '');
+    if (lastO) document.getElementById('f-qty').value = lastO.qty || 1;
+    updateTotal();
+    showToast('✅ Pre-filled from ' + c.name + "'s last order", 'success');
+    document.getElementById('f-delivery-date').focus();
+  }, 50);
+}
+
+// ─── AUTOCOMPLETE ─────────────────────────────────────────
+function handleNameInput(val) {
+  const list = document.getElementById('name-suggestions');
+  if (!val || val.length < 2) { list.classList.remove('open'); return; }
+  const matches = Object.values(customers).filter(c =>
+    c.name.toLowerCase().includes(val.toLowerCase())
+  ).slice(0, 6);
+  if (!matches.length) { list.classList.remove('open'); return; }
+  list.innerHTML = matches.map(c => `
+    <div class="autocomplete-item" onclick="fillFromCustomer('${c.id}')">
+      <strong>${c.name}</strong>
+      <span>${c.society}${c.flat ? ' · ' + c.flat : ''} · ${c.orders.length} prev order${c.orders.length>1?'s':''}</span>
+    </div>`).join('');
+  list.classList.add('open');
+}
+
+function fillFromCustomer(custId) {
+  const c = customers[custId];
+  if (!c) return;
+  document.getElementById('f-name').value = c.name;
+  document.getElementById('f-whatsapp').value = c.whatsapp || '';
+  document.getElementById('f-contact').value = c.contact || '';
+  document.getElementById('f-flat').value = c.flat || '';
+  const soc = document.getElementById('f-society');
+  for (let i=0;i<soc.options.length;i++) {
+    if (soc.options[i].value === c.society) { soc.selectedIndex = i; break; }
+  }
+  const lastO = c.orders[c.orders.length-1];
+  populatePacks(getSocietyType(), lastO ? lastO.pack : '');
+  if (lastO) document.getElementById('f-qty').value = lastO.qty || 1;
+  updateTotal();
+  document.getElementById('name-suggestions').classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.autocomplete-wrap'))
+    document.getElementById('name-suggestions').classList.remove('open');
+});
+
+// ─── TABS ─────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'orders') renderOrders();
+  if (name === 'customers') renderCustomers(document.getElementById('search-customers').value);
+  if (name === 'summary') renderSummary();
+}
+
+function updateTabCounts() {
+  document.getElementById('tab-orders').textContent = `Orders (${orders.length})`;
+  document.getElementById('tab-customers').textContent = `Customers (${Object.keys(customers).length})`;
+}
+
+// ─── PRICING ─────────────────────────────────────────────
+function getSocietyType() {
+  return document.getElementById('f-society').value === 'IIM-L Alumni' ? 'iim' : 'standard';
+}
+function calcTotal(society, pack, qty) {
+  const type = society === 'IIM-L Alumni' ? 'iim' : 'standard';
+  return (PRICING[type][pack] || 0) * qty;
+}
+function populatePacks(type, selectedPack) {
+  const sel = document.getElementById('f-pack');
+  sel.innerHTML = '';
+  Object.keys(PRICING[type]).forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = k + ' kg — ₹' + PRICING[type][k];
+    if (k === selectedPack) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  updateTotal();
+}
+function updateTotal() {
+  const soc = document.getElementById('f-society').value;
+  const pack = document.getElementById('f-pack').value;
+  const qty = parseInt(document.getElementById('f-qty').value)||1;
+  document.getElementById('f-total').textContent = '₹' + calcTotal(soc, pack, qty);
+}
+function populateEditPacks() {
+  const soc = document.getElementById('e-society').value;
+  const type = soc === 'IIM-L Alumni' ? 'iim' : 'standard';
+  const sel = document.getElementById('e-pack');
+  const cur = sel.value;
+  sel.innerHTML = '';
+  Object.keys(PRICING[type]).forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k; opt.textContent = k + ' kg';
+    if (k === cur) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  updateEditTotal();
+}
+function updateEditTotal() {
+  const soc = document.getElementById('e-society').value;
+  const pack = document.getElementById('e-pack').value;
+  const qty = parseInt(document.getElementById('e-qty').value)||1;
+  document.getElementById('e-total').textContent = '₹' + calcTotal(soc, pack, qty);
+}
+
+// ─── STATS ───────────────────────────────────────────────
+function renderStats() {
+  const total = orders.reduce((s,o)=>s+(o.total||0),0);
+  const paid = orders.filter(o=>o.paymentStatus!=='Unpaid').reduce((s,o)=>s+(o.total||0),0);
+  const pending = orders.filter(o=>o.deliveryStatus==='Pending').length;
+  const uniqueC = Object.keys(customers).length;
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Orders</div><div class="stat-value">${orders.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value">₹${total.toLocaleString('en-IN')}</div></div>
+    <div class="stat-card"><div class="stat-label">Collected</div><div class="stat-value">₹${paid.toLocaleString('en-IN')}</div><div class="stat-sub">₹${(total-paid).toLocaleString('en-IN')} pending</div></div>
+    <div class="stat-card"><div class="stat-label">Pending Delivery</div><div class="stat-value">${pending}</div></div>
+    <div class="stat-card"><div class="stat-label">Customers</div><div class="stat-value">${uniqueC}</div></div>
+  `;
+}
+
+// ─── ORDERS ──────────────────────────────────────────────
+async function addOrder() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { document.getElementById('f-name').focus(); showToast('Please enter a name', 'error'); return; }
+  const society = document.getElementById('f-society').value;
+  const pack = document.getElementById('f-pack').value;
+  const qty = parseInt(document.getElementById('f-qty').value)||1;
+  const order = {
+    id: Date.now(),
+    orderNo: orders.length + 1,
+    dateTime: new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}),
+    name,
+    whatsapp: document.getElementById('f-whatsapp').value.trim(),
+    contact: document.getElementById('f-contact').value.trim(),
+    society,
+    flat: document.getElementById('f-flat').value.trim(),
+    packSize: pack,
+    quantity: qty,
+    total: calcTotal(society, pack, qty),
+    deliveryDate: document.getElementById('f-delivery-date').value,
+    deliveryStatus: 'Pending',
+    paymentStatus: 'Unpaid',
+    notes: document.getElementById('f-notes').value.trim()
+  };
+  orders.push(order);
+  await DB.put('orders', order);
+  await rebuildCustomers();
+  clearForm();
+  renderStats();
+  renderCustomers('');
+  updateTabCounts();
+  showToast('✅ Order saved!', 'success');
+}
+
+function clearForm() {
+  ['f-name','f-whatsapp','f-contact','f-flat','f-notes','raw-msg'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('f-qty').value = 1;
+  document.getElementById('f-delivery-date').value = '';
+  updateTotal();
+}
+
+function renderOrders() {
+  const search = (document.getElementById('search-orders').value||'').toLowerCase();
+  const delFilter = document.getElementById('filter-delivery').value;
+  const payFilter = document.getElementById('filter-payment').value;
+  let filtered = orders.filter(o => {
+    const matchSearch = !search || o.name.toLowerCase().includes(search) || (o.society||'').toLowerCase().includes(search);
+    const matchDel = !delFilter || o.deliveryStatus === delFilter;
+    const matchPay = !payFilter || o.paymentStatus === payFilter;
+    return matchSearch && matchDel && matchPay;
+  });
+  const tbody = document.getElementById('orders-body');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">No orders found</td></tr>`;
+    document.getElementById('orders-totals').style.display = 'none';
+    return;
+  }
+
+  // compute and show totals
+  const totalKg = filtered.reduce((s,o) => s + (parseFloat(o.packSize)||0) * (o.quantity||0), 0);
+  const totalAmt = filtered.reduce((s,o) => s + (o.total||0), 0);
+  const totalPaid = filtered.filter(o=>o.paymentStatus!=='Unpaid').reduce((s,o)=>s+(o.total||0),0);
+  const totalsBar = document.getElementById('orders-totals');
+  totalsBar.style.display = 'flex';
+  totalsBar.innerHTML = `
+    <span style="font-size:13px;color:var(--muted)">${filtered.length} order${filtered.length!==1?'s':''}</span>
+    <span style="width:1px;background:var(--border);height:16px;display:inline-block"></span>
+    <span>📦 <strong>${totalKg} kg</strong> total</span>
+    <span style="width:1px;background:var(--border);height:16px;display:inline-block"></span>
+    <span>💰 <strong>₹${totalAmt.toLocaleString('en-IN')}</strong></span>
+    <span style="color:var(--green)">✔️ ₹${totalPaid.toLocaleString('en-IN')} collected</span>
+    <span style="color:var(--red)">· ₹${(totalAmt-totalPaid).toLocaleString('en-IN')} pending</span>
+  `;
+  tbody.innerHTML = filtered.map(o => `
+    <tr>
+      <td style="color:var(--muted);font-size:12px">#${o.orderNo}</td>
+      <td>
+        <div class="td-name">${o.name}</div>
+        <div class="td-sub">${o.flat || ''} ${o.whatsapp ? '· ' + o.whatsapp : ''}</div>
+      </td>
+      <td>${o.society || '—'}</td>
+      <td>${o.packSize} kg</td>
+      <td>${o.quantity}</td>
+      <td style="font-weight:600">₹${o.total}</td>
+      <td>
+        <select class="inline-select" onchange="updateOrderField(${o.id},'deliveryStatus',this.value)" style="color:${o.deliveryStatus==='Delivered'?'var(--green)':'var(--accent)'}">
+          <option ${o.deliveryStatus==='Pending'?'selected':''}>Pending</option>
+          <option ${o.deliveryStatus==='Delivered'?'selected':''}>Delivered</option>
+        </select>
+        ${o.deliveryDate ? `<div style="font-size:11px;color:var(--muted)">${o.deliveryDate}</div>` : ''}
+      </td>
+      <td>
+        <select class="inline-select" onchange="updateOrderField(${o.id},'paymentStatus',this.value)" style="color:${o.paymentStatus!=='Unpaid'?'var(--green)':'var(--red)'}">
+          <option ${o.paymentStatus==='Unpaid'?'selected':''}>Unpaid</option>
+          <option ${o.paymentStatus==='Paid (Cash)'?'selected':''}>Paid (Cash)</option>
+          <option ${o.paymentStatus==='Paid (UPI)'?'selected':''}>Paid (UPI)</option>
+        </select>
+      </td>
+      <td style="font-size:12px;color:var(--muted);max-width:160px;white-space:normal">${o.notes || '—'}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" onclick="repeatOrderFromId(${o.id})" title="Repeat Order">🔄</button>
+          <button class="btn btn-ghost btn-sm" onclick="openEdit(${o.id})" title="Edit">✏️</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteOrder(${o.id})" title="Delete" style="color:var(--red)">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function updateOrderField(id, field, value) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  o[field] = value;
+  await DB.put('orders', o);
+  await rebuildCustomers();
+  renderStats();
+  renderCustomers('');
+}
+
+async function deleteOrder(id) {
+  if (!confirm('Delete this order?')) return;
+  orders = orders.filter(o => o.id !== id);
+  await DB.delete('orders', id);
+  orders.forEach((o,i) => o.orderNo = i+1);
+  await rebuildCustomers();
+  renderOrders();
+  renderStats();
+  renderCustomers('');
+  updateTabCounts();
+  showToast('Order deleted');
+}
+
+async function confirmClearAll() {
+  if (!confirm('Delete ALL orders? This cannot be undone.')) return;
+  orders = [];
+  await DB.clear('orders');
+  customers = {};
+  renderOrders();
+  renderStats();
+  renderCustomers('');
+  updateTabCounts();
+  showToast('All orders cleared');
+}
+
+function repeatOrderFromId(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  const key = customerKey(o.name, o.whatsapp);
+  repeatOrder(key);
+}
+
+// ─── EDIT MODAL ───────────────────────────────────────────
+function openEdit(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  editingId = id;
+  document.getElementById('e-name').value = o.name || '';
+  document.getElementById('e-whatsapp').value = o.whatsapp || '';
+  document.getElementById('e-contact').value = o.contact || '';
+  document.getElementById('e-flat').value = o.flat || '';
+  document.getElementById('e-notes').value = o.notes || '';
+  document.getElementById('e-delivery-date').value = o.deliveryDate || '';
+  document.getElementById('e-delivery-status').value = o.deliveryStatus || 'Pending';
+  document.getElementById('e-payment').value = o.paymentStatus || 'Unpaid';
+  const soc = document.getElementById('e-society');
+  for (let i=0;i<soc.options.length;i++) {
+    if (soc.options[i].value === o.society) { soc.selectedIndex = i; break; }
+  }
+  const type = o.society === 'IIM-L Alumni' ? 'iim' : 'standard';
+  const sel = document.getElementById('e-pack');
+  sel.innerHTML = '';
+  Object.keys(PRICING[type]).forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k; opt.textContent = k + ' kg';
+    if (k === o.packSize) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  document.getElementById('e-qty').value = o.quantity || 1;
+  updateEditTotal();
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+async function saveEdit() {
+  const o = orders.find(x => x.id === editingId);
+  if (!o) return;
+  o.name = document.getElementById('e-name').value.trim();
+  o.whatsapp = document.getElementById('e-whatsapp').value.trim();
+  o.contact = document.getElementById('e-contact').value.trim();
+  o.society = document.getElementById('e-society').value;
+  o.flat = document.getElementById('e-flat').value.trim();
+  o.packSize = document.getElementById('e-pack').value;
+  o.quantity = parseInt(document.getElementById('e-qty').value)||1;
+  o.deliveryDate = document.getElementById('e-delivery-date').value;
+  o.deliveryStatus = document.getElementById('e-delivery-status').value;
+  o.paymentStatus = document.getElementById('e-payment').value;
+  o.notes = document.getElementById('e-notes').value.trim();
+  o.total = calcTotal(o.society, o.packSize, o.quantity);
+  await DB.put('orders', o);
+  await rebuildCustomers();
+  closeModal();
+  renderOrders();
+  renderStats();
+  renderCustomers('');
+  showToast('✅ Order updated', 'success');
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  editingId = null;
+}
+document.getElementById('edit-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('edit-modal')) closeModal();
+});
+
+// ─── SUMMARY ─────────────────────────────────────────────
+function renderSummary() {
+  const el = document.getElementById('summary-content');
+  if (!orders.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">No data yet</div></div>'; return; }
+  // by society
+  const byGroup = {};
+  orders.forEach(o => {
+    if (!byGroup[o.society]) byGroup[o.society] = { orders:0, packs:0, revenue:0, paid:0 };
+    byGroup[o.society].orders++;
+    byGroup[o.society].packs += o.quantity||0;
+    byGroup[o.society].revenue += o.total||0;
+    if (o.paymentStatus !== 'Unpaid') byGroup[o.society].paid += o.total||0;
+  });
+  const totalRev = orders.reduce((s,o)=>s+(o.total||0),0);
+  const totalPaid = orders.filter(o=>o.paymentStatus!=='Unpaid').reduce((s,o)=>s+(o.total||0),0);
+  const totalPacks = orders.reduce((s,o)=>s+(o.quantity||0),0);
+  const delivPending = orders.filter(o=>o.deliveryStatus==='Pending').length;
+  const delivDone = orders.filter(o=>o.deliveryStatus==='Delivered').length;
+  // delivery by date
+  const byDate = {};
+  orders.filter(o=>o.deliveryDate && o.deliveryStatus==='Pending').forEach(o => {
+    if (!byDate[o.deliveryDate]) byDate[o.deliveryDate] = [];
+    byDate[o.deliveryDate].push(o);
+  });
+  el.innerHTML = `
+  <div class="stats-grid" style="margin-bottom:24px">
+    <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value">₹${totalRev.toLocaleString('en-IN')}</div></div>
+    <div class="stat-card"><div class="stat-label">Collected</div><div class="stat-value">₹${totalPaid.toLocaleString('en-IN')}</div><div class="stat-sub">₹${(totalRev-totalPaid).toLocaleString('en-IN')} outstanding</div></div>
+    <div class="stat-card"><div class="stat-label">Total Packs</div><div class="stat-value">${totalPacks}</div></div>
+    <div class="stat-card"><div class="stat-label">Delivered</div><div class="stat-value">${delivDone}</div><div class="stat-sub">${delivPending} pending</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📍 By Society / Group</div>
+    <div class="table-wrap">
+    <table class="summary-table">
+      <thead><tr><th>Group</th><th>Orders</th><th>Packs</th><th>Revenue</th><th>Collected</th><th>Pending</th></tr></thead>
+      <tbody>
+        ${Object.entries(byGroup).map(([g,d])=>`
+          <tr><td>${g}</td><td>${d.orders}</td><td>${d.packs}</td><td>₹${d.revenue.toLocaleString('en-IN')}</td><td>₹${d.paid.toLocaleString('en-IN')}</td><td>₹${(d.revenue-d.paid).toLocaleString('en-IN')}</td></tr>
+        `).join('')}
+        <tr><td>Total</td><td>${orders.length}</td><td>${totalPacks}</td><td>₹${totalRev.toLocaleString('en-IN')}</td><td>₹${totalPaid.toLocaleString('en-IN')}</td><td>₹${(totalRev-totalPaid).toLocaleString('en-IN')}</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  ${Object.keys(byDate).length ? `
+  <div class="card">
+    <div class="card-title">🚚 Pending Deliveries by Date</div>
+    ${Object.entries(byDate).sort().map(([date, ords]) => `
+      <div style="margin-bottom:16px">
+        <div style="font-weight:600;margin-bottom:8px;color:var(--accent)">${date}</div>
+        ${ords.map(o=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${o.name} · ${o.society} · ${o.quantity}×${o.packSize}kg</span><span style="color:var(--muted)">${o.paymentStatus}</span></div>`).join('')}
+      </div>
+    `).join('')}
+  </div>` : ''}
+  `;
+}
+
+// ─── AI PARSER ───────────────────────────────────────────
+async function parseMessage() {
+  const msg = document.getElementById('raw-msg').value.trim();
+  if (!msg) return;
+  const apiKey = localStorage.getItem('mango-api-key');
+  if (!apiKey) { showToast('Add API key in Settings first', 'error'); return; }
+  const btn = document.querySelector('.ai-area .btn');
+  const status = document.getElementById('parse-status');
+  btn.disabled = true;
+  status.textContent = 'Parsing…';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        messages: [{
+          role: 'user',
+          content: `Extract order details from this WhatsApp message for a mango business. Return ONLY valid JSON with these exact keys: name, whatsapp, contact, society, flat, packSize (number as string: "2","3","5","7"), quantity (number). If a field isn't mentioned, use empty string or 1 for quantity.\n\nMessage: ${msg}`
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content[0].text.replace(/```json|```/g,'').trim();
+    const p = JSON.parse(text);
+    if (p.name) document.getElementById('f-name').value = p.name;
+    if (p.whatsapp) document.getElementById('f-whatsapp').value = p.whatsapp;
+    if (p.contact) document.getElementById('f-contact').value = p.contact;
+    if (p.flat) document.getElementById('f-flat').value = p.flat;
+    if (p.society) {
+      const soc = document.getElementById('f-society');
+      for (let i=0;i<soc.options.length;i++) { if(soc.options[i].value===p.society){soc.selectedIndex=i;break;} }
+    }
+    const type = document.getElementById('f-society').value === 'IIM-L Alumni' ? 'iim' : 'standard';
+    const validPack = PRICING[type][p.packSize] ? p.packSize : Object.keys(PRICING[type])[0];
+    populatePacks(type, validPack);
+    document.getElementById('f-qty').value = p.quantity || 1;
+    updateTotal();
+    // check if customer exists
+    if (p.name) handleNameInput(p.name);
+    status.textContent = '✅ Parsed!';
+    setTimeout(()=>status.textContent='', 2500);
+  } catch(e) {
+    status.textContent = '⚠️ Could not parse — fill in manually';
+    setTimeout(()=>status.textContent='', 3000);
+  }
+  btn.disabled = false;
+}
+
+// ─── SETTINGS ────────────────────────────────────────────
+function saveApiKey() {
+  const k = document.getElementById('api-key-input').value.trim();
+  if (!k) return;
+  localStorage.setItem('mango-api-key', k);
+  showToast('✅ API key saved', 'success');
+}
+
+function renderPricingInputs() {
+  document.getElementById('pricing-standard').innerHTML = Object.entries(PRICING.standard).map(([k,v])=>`
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+      <span style="font-size:12px;width:40px">${k}kg</span>
+      <input type="number" value="${v}" data-type="standard" data-pack="${k}" style="border:1px solid var(--border);border-radius:6px;padding:5px 8px;width:80px;font-size:13px;font-family:inherit" />
+    </div>`).join('');
+  document.getElementById('pricing-iim').innerHTML = Object.entries(PRICING.iim).map(([k,v])=>`
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+      <span style="font-size:12px;width:40px">${k}kg</span>
+      <input type="number" value="${v}" data-type="iim" data-pack="${k}" style="border:1px solid var(--border);border-radius:6px;padding:5px 8px;width:80px;font-size:13px;font-family:inherit" />
+    </div>`).join('');
+}
+
+function savePricing() {
+  document.querySelectorAll('#pricing-standard input, #pricing-iim input').forEach(inp => {
+    const type = inp.dataset.type;
+    const pack = inp.dataset.pack;
+    PRICING[type][pack] = parseInt(inp.value)||0;
+  });
+  localStorage.setItem('mango-pricing-2026', JSON.stringify(PRICING));
+  populatePacks(getSocietyType(), '');
+  showToast('✅ Pricing saved', 'success');
+}
+
+// ─── EXPORT / IMPORT ─────────────────────────────────────
+function exportCSV() {
+  if (!orders.length) { showToast('No orders to export', 'error'); return; }
+  const headers = ['Order No','Date','Name','WhatsApp','Contact','Society','Flat','Pack (kg)','Qty','Total (Rs)','Delivery Date','Delivery Status','Payment','Notes'];
+  const rows = orders.map(o=>[o.orderNo,o.dateTime,o.name,o.whatsapp,o.contact,o.society,o.flat,o.packSize,o.quantity,o.total,o.deliveryDate,o.deliveryStatus,o.paymentStatus,o.notes]);
+  const csv = [headers,...rows].map(r=>r.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mango-orders-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  showToast('✅ CSV exported', 'success');
+}
+
+async function importCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  const lines = text.split('\n').filter(l=>l.trim());
+  const rows = lines.slice(1);
+  let count = 0;
+  for (const row of rows) {
+    const cols = row.match(/(".*?"|[^,]+)(?=,|$)/g) || [];
+    const clean = cols.map(c=>c.replace(/^"|"$/g,'').replace(/""/g,'"'));
+    if (!clean[2]) continue;
+    const order = {
+      id: Date.now() + count,
+      orderNo: parseInt(clean[0])||orders.length+1,
+      dateTime: clean[1]||'',
+      name: clean[2]||'',
+      whatsapp: clean[3]||'',
+      contact: clean[4]||'',
+      society: clean[5]||'',
+      flat: clean[6]||'',
+      packSize: clean[7]||'',
+      quantity: parseInt(clean[8])||1,
+      total: parseInt(clean[9])||0,
+      deliveryDate: clean[10]||'',
+      deliveryStatus: clean[11]||'Pending',
+      paymentStatus: clean[12]||'Unpaid',
+      notes: clean[13]||''
+    };
+    orders.push(order);
+    await DB.put('orders', order);
+    count++;
+  }
+  await rebuildCustomers();
+  renderOrders();
+  renderStats();
+  renderCustomers('');
+  updateTabCounts();
+  showToast(`✅ Imported ${count} orders`, 'success');
+  event.target.value = '';
+}
+
+
+// ─── EXPORT CUSTOMERS XLSX ────────────────────────────────
+function exportCustomersXLSX() {
+  const clist = Object.values(customers);
+  if (!clist.length) { showToast('No customers to export', 'error'); return; }
+
+  const wb = XLSX.utils.book_new();
+
+  // Sheet 1: Customer Summary
+  const summaryData = [
+    ['Name','WhatsApp','Contact','Society','Flat/Address','Total Orders','Total Amount (₹)','Total Paid (₹)','Outstanding (₹)']
+  ];
+  clist.forEach(c => {
+    summaryData.push([
+      c.name, c.whatsapp||'', c.contact||'', c.society||'', c.flat||'',
+      c.orders.length,
+      c.totalAmount,
+      c.totalPaid,
+      c.totalAmount - c.totalPaid
+    ]);
+  });
+  const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+  ws1['!cols'] = [20,16,16,16,22,12,16,16,16].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws1, 'Customers');
+
+  // Sheet 2: Order History
+  const histData = [
+    ['Customer','Society','Order Date','Delivery Date','Pack (kg)','Qty','Total (₹)','Payment','Delivery']
+  ];
+  clist.forEach(c => {
+    c.orders.forEach(o => {
+      histData.push([
+        c.name, c.society||'',
+        o.date||'', o.deliveryDate||'',
+        o.pack, o.qty, o.total,
+        o.payment, o.delivery
+      ]);
+    });
+  });
+  const ws2 = XLSX.utils.aoa_to_sheet(histData);
+  ws2['!cols'] = [20,16,16,14,10,6,12,14,12].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws2, 'Order History');
+
+  XLSX.writeFile(wb, 'mango-customers-' + new Date().toISOString().slice(0,10) + '.xlsx');
+  showToast('✅ Customers exported to XLSX', 'success');
+}
+
+// ─── TOAST ───────────────────────────────────────────────
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' '+type : '');
+  setTimeout(()=>t.className='toast', 3000);
+}
+
+load();
+</script>
+</body>
+</html>
