@@ -33,7 +33,7 @@ So I built it.
 
 - **AI-powered WhatsApp parser** — Paste any message and the app calls Claude (Anthropic) to extract customer name, quantity, variety, delivery address, and special notes into a structured order. One click, no transcription.
 - **Customer CRM with autocomplete** — Returning customers are recognized and auto-filled. Repeat order in two clicks.
-- **Two pricing tiers** — IIM-L Alumni (₹900/5kg, ₹1200/7kg) and Standard (₹800/5kg). Pricing is configurable in Settings.
+- **Two pricing tiers** — IIM-L Alumni (₹xxx/5kg, ₹xxxx/7kg) and Standard (₹xxx/5kg). Pricing is configurable in Settings.
 - **Order lifecycle tracking** — Each order tracks delivery status and payment status with inline dropdowns. No external tool needed.
 - **Summary analytics** — Season totals by customer group. Revenue, boxes, average order size.
 - **Export** — Full order data as CSV or XLSX. Import CSV for bulk loads.
